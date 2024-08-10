@@ -1,10 +1,11 @@
+version: '3.8'  # Specify the version of the Docker Compose file format
 services:
   mysql:
-    image: mysql:8.4
+    image: mysql:8.0.39
     ports:
-      - "3306:3306"
+      - "3307:3306"  # Changed host port to avoid conflicts (if necessary)
     environment:
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=petclinic
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
       - MYSQL_USER=petclinic
       - MYSQL_PASSWORD=petclinic
@@ -13,13 +14,18 @@ services:
       - "./conf.d:/etc/mysql/conf.d:ro"
     profiles:
       - mysql
+    restart: unless-stopped
   postgres:
-    image: postgres:16.3
+    image: postgres:16.4
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Changed host port to avoid conflicts (if necessary)
     environment:
       - POSTGRES_PASSWORD=petclinic
       - POSTGRES_USER=petclinic
       - POSTGRES_DB=petclinic
     profiles:
       - postgres
+    restart: unless-stopped
+networks:
+  default:
+    driver: bridge
