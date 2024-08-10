@@ -28,16 +28,6 @@ jobs:
           echo "Docker already installed, skipping installation."
         fi
 
-    - name: Set up JDK 17
-      run: |
-        if ! java -version 2>&1 | grep -q "17"
-        then
-          echo "Java 17 not found, installing..."
-          sudo yum install -y java-17-openjdk-devel
-        else
-          echo "Java 17 already installed, skipping installation."
-        fi
-
     - name: Install Docker Compose
       run: |
         if ! command -v docker-compose &> /dev/null
