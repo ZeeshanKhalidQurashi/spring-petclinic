@@ -1,96 +1,67 @@
-name: Spring PetClinic CI/CD
+name: Comprehensive Setup and Deployment
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  setup-environment:
+  setup:
     runs-on: self-hosted
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Docker
-      run: |
-        if ! command -v docker &> /dev/null
-        then
-          echo "Docker not found, installing..."
-          sudo yum install -y docker
-          sudo systemctl start docker
-          sudo systemctl enable docker
-        else
-          echo "Docker already installed, skipping installation."
-        fi
+      - name: Create CI/CD User
+        run: |
+          sudo adduser --disabled-password --gecos 'CI/CD User' ci-cd-user || echo "User already exists"
+          echo "CI/CD User created or already exists"
 
-    - name: Set up JDK 17
-      run: |
-        if ! java -version 2>&1 | grep -q "17"
-        then
-          echo "Java 17 not found, installing..."
-          sudo yum install -y java-17-openjdk-devel
-        else
-          echo "Java 17 already installed, skipping installation."
-        fi
+      - name: Update System
+        run: |
+          sudo apt-get update
+          sudo apt-get upgrade -y
 
-    - name: Install Docker Compose
-      run: |
-        if ! command -v docker-compose &> /dev/null
-        then
-          echo "Docker Compose not found, installing..."
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-        else
-          echo "Docker Compose already installed, skipping installation."
-        fi
-
-    - name: Start PostgreSQL and MySQL containers
-      run: docker-compose up -d
+      - name: Install Docker and Git
+        run: |
+          sudo apt-get install -y docker.io git
 
   build:
-    needs: setup-environment
     runs-on: self-hosted
-    if: github.actor == 'username' # Optional: Restrict job to specific user or condition
-
+    needs: setup
     steps:
-    - name: Run on VM
-      run: |
-        if [ "$(curl -s ifconfig.me)" = "103.151.111.190" ]; then
-          ssh user@103.151.111.190 'cd /path/to/project && ./mvnw clean install'
-        else
-          echo "Skipping build on this VM."
-          exit 0
-        fi
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Clone Spring Petclinic Project
+        run: |
+          git clone https://github.com/spring-projects/spring-petclinic.git
+
+      - name: Build Pilot Project
+        run: |
+          cd spring-petclinic
+          ./mvnw package
 
   deploy:
-    needs: build
     runs-on: self-hosted
-
+    needs: build
     steps:
-    - name: Deploy to VM
-      run: |
-        if [ "$(curl -s ifconfig.me)" = "103.151.111.190" ]; then
-          ssh user@103.151.111.190 'cd /path/to/project && nohup java -jar target/*.jar --server.port=8090 &'
-        else
-          echo "Skipping deploy on this VM."
-          exit 0
-        fi
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Build Docker Image
+        run: |
+          cd spring-petclinic
+          docker build -t spring-petclinic .
+
+      - name: Run Docker Container
+        run: |
+          docker run -d -p 8090:8080 spring-petclinic
 
   test:
-    needs: deploy
     runs-on: self-hosted
-
+    needs: deploy
     steps:
-    - name: Run Tests
-      run: |
-        if [ "$(curl -s ifconfig.me)" = "103.151.111.190" ]; then
-          ./mvnw test
-        else
-          echo "Skipping tests on this VM."
-          exit 0
-        fi
+      - name: Verify Pilot Project URL
+        run: |
+          curl -I http://localhost:8090
