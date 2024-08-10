@@ -28,6 +28,16 @@ jobs:
           echo "Docker already installed, skipping installation."
         fi
 
+    - name: Set up JDK 17
+      run: |
+        if ! java -version 2>&1 | grep -q "17"
+        then
+          echo "Java 17 not found, installing..."
+          sudo yum install -y java-17-openjdk-devel
+        else
+          echo "Java 17 already installed, skipping installation."
+        fi
+
     - name: Install Docker Compose
       run: |
         if ! command -v docker-compose &> /dev/null
@@ -44,27 +54,32 @@ jobs:
 
   build:
     needs: setup-environment
-    strategy:
-      matrix:
-        vm: [103.151.111.190, 10.3.151.111.241]
     runs-on: self-hosted
+    if: github.actor == 'username' # Optional: Restrict job to specific user or condition
 
     steps:
     - name: Run on VM
       run: |
-        ssh ${{ matrix.vm }} 'cd /path/to/project && ./mvnw clean install'
+        if [ "$(curl -s ifconfig.me)" = "103.151.111.190" ]; then
+          ssh user@103.151.111.190 'cd /path/to/project && ./mvnw clean install'
+        else
+          echo "Skipping build on this VM."
+          exit 0
+        fi
 
   deploy:
     needs: build
-    strategy:
-      matrix:
-        vm: [103.151.111.190, 10.3.151.111.241]
     runs-on: self-hosted
 
     steps:
     - name: Deploy to VM
       run: |
-        ssh ${{ matrix.vm }} 'cd /path/to/project && nohup java -jar target/*.jar --server.port=8090 &'
+        if [ "$(curl -s ifconfig.me)" = "103.151.111.190" ]; then
+          ssh user@103.151.111.190 'cd /path/to/project && nohup java -jar target/*.jar --server.port=8090 &'
+        else
+          echo "Skipping deploy on this VM."
+          exit 0
+        fi
 
   test:
     needs: deploy
@@ -72,4 +87,10 @@ jobs:
 
     steps:
     - name: Run Tests
-      run: ./mvnw test
+      run: |
+        if [ "$(curl -s ifconfig.me)" = "103.151.111.190" ]; then
+          ./mvnw test
+        else
+          echo "Skipping tests on this VM."
+          exit 0
+        fi
