@@ -46,7 +46,7 @@ jobs:
     needs: setup-environment
     strategy:
       matrix:
-        vm: [103.151.111.190, 103.151.111.241, 103.151.111.188]
+        vm: [103.151.111.190, 10.3.151.111.241]
     runs-on: self-hosted
 
     steps:
@@ -58,7 +58,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        vm: [103.151.111.190, 103.151.111.241, 103.151.111.188]
+        vm: [103.151.111.190, 10.3.151.111.241]
     runs-on: self-hosted
 
     steps:
