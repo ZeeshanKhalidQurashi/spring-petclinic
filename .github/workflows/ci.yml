@@ -1,70 +1,85 @@
-name: CI/CD Pipeline
+name: Spring PetClinic CI/CD
+
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+
 jobs:
-  build:
+  setup-environment:
     runs-on: self-hosted
-    services:
-      mysql:
-        image: mysql:8.4
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: petclinic
-          MYSQL_PASSWORD: petclinic
-          MYSQL_DATABASE: petclinic
-      postgres:
-        image: postgres:16.3
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        env:
-          POSTGRES_PASSWORD: petclinic
-          POSTGRES_USER: petclinic
-          POSTGRES_DB: petclinic
-    strategy:
-      matrix:
-        java: [ '17' ]
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: 'adopt'
-          cache: maven
-      - name: Build with Maven
-        run: ./mvnw -B package
-      - name: Run tests
-        run: ./mvnw test
-      - name: Build Docker Image
-        run: docker build -f .devcontainer/Dockerfile -t my-app .
-      - name: Install docker-compose
-        run: |
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker
+      run: |
+        if ! command -v docker &> /dev/null
+        then
+          echo "Docker not found, installing..."
+          sudo yum install -y docker
+          sudo systemctl start docker
+          sudo systemctl enable docker
+        else
+          echo "Docker already installed, skipping installation."
+        fi
+
+    - name: Set up JDK 17
+      run: |
+        if ! java -version 2>&1 | grep -q "17"
+        then
+          echo "Java 17 not found, installing..."
+          sudo yum install -y java-17-openjdk-devel
+        else
+          echo "Java 17 already installed, skipping installation."
+        fi
+
+    - name: Install Docker Compose
+      run: |
+        if ! command -v docker-compose &> /dev/null
+        then
+          echo "Docker Compose not found, installing..."
           sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
-      - name: Run Docker Compose
-        run: docker-compose up -d
-      - name: Run Integration Tests
-        run: ./mvnw verify -Pintegration-test
-      - name: Tear Down Docker Compose
-        run: docker-compose down
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: target/*.jar
+        else
+          echo "Docker Compose already installed, skipping installation."
+        fi
+
+    - name: Start PostgreSQL and MySQL containers
+      run: docker-compose up -d
+
+  build:
+    needs: setup-environment
+    strategy:
+      matrix:
+        vm: [103.151.111.190, 103.151.111.241, 103.151.111.188]
+    runs-on: self-hosted
+
+    steps:
+    - name: Run on VM
+      run: |
+        ssh ${{ matrix.vm }} 'cd /path/to/project && ./mvnw clean install'
+
+  deploy:
+    needs: build
+    strategy:
+      matrix:
+        vm: [103.151.111.190, 103.151.111.241, 103.151.111.188]
+    runs-on: self-hosted
+
+    steps:
+    - name: Deploy to VM
+      run: |
+        ssh ${{ matrix.vm }} 'cd /path/to/project && nohup java -jar target/*.jar --server.port=8090 &'
+
+  test:
+    needs: deploy
+    runs-on: self-hosted
+
+    steps:
+    - name: Run Tests
+      run: ./mvnw test
