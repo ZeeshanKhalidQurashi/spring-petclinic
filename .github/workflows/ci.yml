@@ -7,51 +7,27 @@ on:
 
 jobs:
   setup:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Create CI/CD User
         run: |
-          if ! id -u ci-cd-user > /dev/null 2>&1; then
-            sudo adduser --disabled-password --gecos 'CI/CD User' ci-cd-user
-            echo "CI/CD User created."
-          else
-            echo "CI/CD User already exists."
-          fi
+          sudo adduser --disabled-password --gecos 'CI/CD User' ci-cd-user || echo "User already exists"
+          echo "CI/CD User created or already exists"
 
       - name: Update System
         run: |
-          sudo dnf update -y
-          sudo dnf upgrade -y
+          sudo apt-get update
+          sudo apt-get upgrade -y
 
       - name: Install Docker and Git
         run: |
-          # Clean up DNF cache
-          sudo dnf clean all
-          sudo rm -rf /var/cache/dnf
-
-          # Check and install Docker if not present
-          if ! command -v docker &> /dev/null; then
-            echo "Docker not found, installing..."
-            sudo dnf install -y docker
-            sudo systemctl start docker
-            sudo systemctl enable docker
-          else
-            echo "Docker is already installed."
-          fi
-
-          # Check and install Git if not present
-          if ! command -v git &> /dev/null; then
-            echo "Git not found, installing..."
-            sudo dnf install -y git
-          else
-            echo "Git is already installed."
-          fi
+          sudo apt-get install -y docker.io git
 
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: setup
     steps:
       - name: Checkout code
@@ -59,11 +35,7 @@ jobs:
       
       - name: Clone Spring Petclinic Project
         run: |
-          if [ ! -d "spring-petclinic" ]; then
-            git clone https://github.com/spring-projects/spring-petclinic.git
-          else
-            echo "Spring Petclinic project already cloned."
-          fi
+          git clone https://github.com/spring-projects/spring-petclinic.git
 
       - name: Build Pilot Project
         run: |
@@ -71,7 +43,7 @@ jobs:
           ./mvnw package
 
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Checkout code
@@ -80,24 +52,16 @@ jobs:
       - name: Build Docker Image
         run: |
           cd spring-petclinic
-          if ! docker image ls | grep -q spring-petclinic; then
-            docker build -t spring-petclinic .
-          else
-            echo "Docker image 'spring-petclinic' already built."
-          fi
+          docker build -t spring-petclinic .
 
       - name: Run Docker Container
         run: |
-          if [ "$(docker ps -q -f name=spring-petclinic)" ]; then
-            echo "Container 'spring-petclinic' is already running."
-          else
-            docker run -d --name spring-petclinic -p 8090:8080 spring-petclinic
-          fi
+          docker run -d -p 8080:8080 spring-petclinic
 
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: deploy
     steps:
       - name: Verify Pilot Project URL
         run: |
-          curl -I http://localhost:8090
+          curl -I http://localhost:8080
