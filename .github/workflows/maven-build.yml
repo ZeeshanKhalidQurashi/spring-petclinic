@@ -62,8 +62,10 @@ jobs:
       - name: Install Java 17
         run: |
           sudo yum install -y java-17-openjdk
-          sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk/bin/java 1
-          sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-openjdk/bin/javac 1
+          sudo alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk/bin/java 1
+          sudo alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-openjdk/bin/javac 1
+          sudo alternatives --set java /usr/lib/jvm/java-17-openjdk/bin/java
+          sudo alternatives --set javac /usr/lib/jvm/java-17-openjdk/bin/javac
           echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk" | sudo tee -a /etc/environment
           source /etc/environment
           echo "JAVA_HOME is set to $JAVA_HOME"
@@ -95,7 +97,7 @@ jobs:
         env:
           JAVA_HOME: /usr/lib/jvm/java-17-openjdk
         run: |
-          ./mvnw -B package
+          ./mvnw -B package -X
 
   deploy:
     runs-on: self-hosted
