@@ -113,10 +113,14 @@ jobs:
             exit 1
           fi
 
-      - name: Add SSH host key
+      - name: Setup SSH
         run: |
+          echo "Setting up SSH..."
           mkdir -p ~/.ssh
-          ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts || true
 
       - name: Deploy application
         env:
