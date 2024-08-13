@@ -100,7 +100,7 @@ jobs:
           export PATH=$JAVA_HOME/bin:$PATH
           ./mvnw -B package
 
-  deploy:
+deploy:
   runs-on: self-hosted
   needs: build
   steps:
@@ -113,9 +113,13 @@ jobs:
           exit 1
         fi
 
+    - name: Check ssh-keyscan
+      run: which ssh-keyscan || echo "ssh-keyscan not found"
+
     - name: Setup SSH
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        DEPLOY_SERVER: '103.151.111.190'
       run: |
         echo "Setting up SSH..."
         mkdir -p ~/.ssh
@@ -123,8 +127,10 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         echo "Scanning for SSH key..."
-        ssh-keyscan -H 103.151.111.190 >> ~/.ssh/known_hosts || true
-        echo "SSH key scan complete."
+        ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts || true
+        echo "Known hosts content:"
+        cat ~/.ssh/known_hosts
+        echo "SSH setup complete."
 
     - name: Deploy application
       env:
@@ -134,10 +140,6 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
         echo "Deploying application to $DEPLOY_SERVER"
-        mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        chmod 700 ~/.ssh
         scp -i ~/.ssh/id_rsa /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar $DEPLOY_USER@$DEPLOY_SERVER:/home/ibtahaj/spring-petclinic/
         ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "java -jar /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar"
      
