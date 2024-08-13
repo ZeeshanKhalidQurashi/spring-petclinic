@@ -86,8 +86,8 @@ jobs:
       - name: Verify JAR file
         run: |
           echo "Verifying JAR file presence..."
-          ls -al /home/ibtahaj/actions-runner/_work/spring-petclinic/target/
-          if [ -z "$(find /home/ibtahaj/actions-runner/_work/spring-petclinic/target/ -name 'spring-petclinic-3.3.0-SNAPSHOT.jar')" ]; then
+          ls -al /home/ibtahaj/spring-petclinic/target/
+          if [ -z "$(find /home/ibtahaj/spring-petclinic/target/ -name 'spring-petclinic-3.3.0-SNAPSHOT.jar')" ]; then
             echo "JAR file not found in target directory!"
             exit 1
           fi
@@ -109,8 +109,8 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           chmod 700 ~/.ssh
-          scp -i ~/.ssh/id_rsa /home/ibtahaj/actions-runner/_work/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar $DEPLOY_USER@$DEPLOY_SERVER:/home/ibtahaj/spring-petclinic/
-          ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "java -jar /home/ibtahaj/spring-petclinic/spring-petclinic-3.3.0-SNAPSHOT.jar"
+          scp -i ~/.ssh/id_rsa /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar $DEPLOY_USER@$DEPLOY_SERVER:/home/ibtahaj/spring-petclinic/
+          ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "java -jar /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar"
 
   test:
     runs-on: self-hosted
@@ -126,3 +126,4 @@ jobs:
 
       - name: Run tests
         run: ./mvnw test
+
