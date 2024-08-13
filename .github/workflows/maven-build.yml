@@ -100,7 +100,7 @@ jobs:
       - name: Deploy application
         env:
           DEPLOY_SERVER: '103.151.111.190'
-          DEPLOY_PORT: '8090'
+          DEPLOY_PORT: '8080'
           DEPLOY_USER: 'ibtahaj'
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
@@ -122,7 +122,7 @@ jobs:
       - name: Check application URL
         run: |
           echo "Checking application URL"
-          curl -s http://103.151.111.190:8090 || exit 1
+          curl -s http://103.151.111.190:8080 || exit 1
 
       - name: Run tests
         run: ./mvnw test
