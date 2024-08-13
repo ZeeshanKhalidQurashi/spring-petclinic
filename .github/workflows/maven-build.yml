@@ -94,10 +94,7 @@ jobs:
           javac -version
 
       - name: Build with Maven
-        env:
-          JAVA_HOME: /usr/lib/jvm/java-17-openjdk
-        run: |
-          ./mvnw -B package -X
+        run: ./mvnw -B package
 
   deploy:
     runs-on: self-hosted
