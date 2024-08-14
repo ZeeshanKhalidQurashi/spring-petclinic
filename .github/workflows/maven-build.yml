@@ -17,60 +17,60 @@ jobs:
           if ! command -v git &> /dev/null
           then
               echo "Git not found, installing..."
-              sudo yum update -y
-              sudo yum install -y git
+              sudo apt-get update -y
+              sudo apt-get install -y git
           else
               echo "Git is already installed."
           fi
 
-      - name: Check for Docker
-        run: |
-          if ! command -v docker &> /dev/null
-          then
-              echo "Docker not found, installing..."
-              sudo yum update -y
-              sudo yum install -y docker
-              sudo systemctl start docker
-              sudo systemctl enable docker
-          else
-              echo "Docker is already installed."
-          fi
+      # - name: Check for Docker
+      #   run: |
+      #     if ! command -v docker &> /dev/null
+      #     then
+      #         echo "Docker not found, installing..."
+      #         sudo apt-get update -y
+      #         sudo apt-get install -y docker.io
+      #         sudo systemctl start docker
+      #         sudo systemctl enable docker
+      #     else
+      #         echo "Docker is already installed."
+      #     fi
 
-      - name: Check for Docker-Compose
-        run: |
-          if ! command -v docker-compose &> /dev/null
-          then
-              echo "Docker Compose not found, installing..."
-              sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              sudo chmod +x /usr/local/bin/docker-compose
-          else
-              echo "Docker Compose is already installed."
-          fi
+      # - name: Check for Docker-Compose
+      #   run: |
+      #     if ! command -v docker-compose &> /dev/null
+      #     then
+      #         echo "Docker Compose not found, installing..."
+      #         sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      #         sudo chmod +x /usr/local/bin/docker-compose
+      #     else
+      #         echo "Docker Compose is already installed."
+      #     fi
 
       - name: Check for Maven
         run: |
           if ! command -v mvn &> /dev/null
           then
               echo "Maven not found, installing..."
-              sudo yum clean all
-              sudo yum update -y
-              sudo yum install -y maven --allowerasing
+              sudo apt-get update -y
+              sudo apt-get install -y maven
           else
               echo "Maven is already installed."
           fi
 
-      - name: Install Java 17
-        run: |
-          sudo yum install -y java-17-openjdk java-17-openjdk-devel
-          sudo alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk/bin/java 1
-          sudo alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-openjdk/bin/javac 1
-          sudo alternatives --set java /usr/lib/jvm/java-17-openjdk/bin/java
-          sudo alternatives --set javac /usr/lib/jvm/java-17-openjdk/bin/javac
-          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk" | sudo tee -a /etc/environment
-          echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk" | sudo tee -a ~/.bashrc
-          echo "export PATH=\$JAVA_HOME/bin:\$PATH" | sudo tee -a ~/.bashrc
-          source ~/.bashrc
-          java -version
+      # - name: Install Java 19
+      #   run: |
+      #     sudo apt-get update -y
+      #     sudo apt-get install -y openjdk-19-jdk
+      #     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-19-openjdk-amd64/bin/java 1
+      #     sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-19-openjdk-amd64/bin/javac 1
+      #     sudo update-alternatives --set java /usr/lib/jvm/java-19-openjdk-amd64/bin/java
+      #     sudo update-alternatives --set javac /usr/lib/jvm/java-19-openjdk-amd64/bin/javac
+      #     echo "JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a /etc/environment
+      #     echo "export JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a ~/.bashrc
+      #     echo "export PATH=\$JAVA_HOME/bin:\$PATH" | sudo tee -a ~/.bashrc
+      #     source ~/.bashrc
+      #     java -version
 
       - name: Validate Installation
         run: |
@@ -85,7 +85,7 @@ jobs:
     runs-on: self-hosted
     needs: setup
     steps:
-      - name: Ensure Java 17 is active
+      - name: Ensure Java 19 is active
         run: |
           echo "Checking Java version..."
           java -version
@@ -96,7 +96,7 @@ jobs:
 
       - name: Build with Maven
         run: |
-          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+          export JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64
           export PATH=$JAVA_HOME/bin:$PATH
           ./mvnw -B package
   
