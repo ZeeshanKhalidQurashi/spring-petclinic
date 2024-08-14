@@ -55,12 +55,6 @@ jobs:
           else
               echo "Maven is already installed."
           fi
-          
-      - name: Validate Installation
-        run: |
-          echo "Validating installation..."
-          command -v git
-          command -v mvn
 
       # - name: Install Java 19
       #   run: |
@@ -80,10 +74,7 @@ jobs:
         run: |
           echo "Validating installation..."
           command -v git
-          command -v docker
-          command -v docker-compose
           command -v mvn
-          java -version
 
   build:
     runs-on: self-hosted
