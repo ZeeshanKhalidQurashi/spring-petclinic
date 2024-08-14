@@ -58,16 +58,29 @@ jobs:
 
       - name: Install Java 19
         run: |
-          wget https://download.java.net/java/GA/jdk19/35/GPL/openjdk-19_linux-x64_bin.tar.gz
-          sudo mkdir /usr/lib/jvm
-          sudo tar -xvf openjdk-19_linux-x64_bin.tar.gz -C /usr/lib/jvm
-          sudo mv /usr/lib/jvm/jdk-19 /usr/lib/jvm/java-19-openjdk-amd64
+          # Download Adoptium Temurin JDK 19
+          wget https://github.com/adoptium/temurin19-binaries/releases/download/jdk-19.0.2+7/OpenJDK19U-jdk_x64_linux_hotspot_19.0.2_7.tar.gz
+          
+          # Create the directory for Java installations
+          sudo mkdir -p /usr/lib/jvm
+          
+          # Extract the downloaded JDK
+          sudo tar -xzf OpenJDK19U-jdk_x64_linux_hotspot_19.0.2_7.tar.gz -C /usr/lib/jvm
+          
+          # Move the JDK to the correct directory
+          sudo mv /usr/lib/jvm/jdk-19.0.2+7 /usr/lib/jvm/java-19-openjdk-amd64
+          
+          # Set up JAVA_HOME and PATH environment variables
           echo "JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a /etc/environment
           echo "export JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a ~/.bashrc
           echo "export PATH=\$JAVA_HOME/bin:\$PATH" | sudo tee -a ~/.bashrc
+          
+          # Apply changes
           source ~/.bashrc
+          
+          # Verify installation
           java -version
-
+        
 
       - name: Validate Installation
         run: |
