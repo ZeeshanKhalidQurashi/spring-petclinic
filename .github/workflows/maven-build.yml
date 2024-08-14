@@ -56,19 +56,19 @@ jobs:
               echo "Maven is already installed."
           fi
 
-      # - name: Install Java 19
-      #   run: |
-      #     sudo apt-get update -y
-      #     sudo apt-get install -y openjdk-19-jdk
-      #     sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-19-openjdk-amd64/bin/java 1
-      #     sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-19-openjdk-amd64/bin/javac 1
-      #     sudo update-alternatives --set java /usr/lib/jvm/java-19-openjdk-amd64/bin/java
-      #     sudo update-alternatives --set javac /usr/lib/jvm/java-19-openjdk-amd64/bin/javac
-      #     echo "JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a /etc/environment
-      #     echo "export JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a ~/.bashrc
-      #     echo "export PATH=\$JAVA_HOME/bin:\$PATH" | sudo tee -a ~/.bashrc
-      #     source ~/.bashrc
-      #     java -version
+      - name: Install Java 19
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y openjdk-19-jdk
+          sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-19-openjdk-amd64/bin/java 1
+          sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-19-openjdk-amd64/bin/javac 1
+          sudo update-alternatives --set java /usr/lib/jvm/java-19-openjdk-amd64/bin/java
+          sudo update-alternatives --set javac /usr/lib/jvm/java-19-openjdk-amd64/bin/javac
+          echo "JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a /etc/environment
+          echo "export JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64" | sudo tee -a ~/.bashrc
+          echo "export PATH=\$JAVA_HOME/bin:\$PATH" | sudo tee -a ~/.bashrc
+          source ~/.bashrc
+          java -version
 
       - name: Validate Installation
         run: |
