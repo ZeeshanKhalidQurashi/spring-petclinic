@@ -97,7 +97,7 @@ jobs:
         run: |
           echo "Deploying application to $DEPLOY_SERVER"
           scp -i ~/.ssh/id_rsa /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar $DEPLOY_USER@$DEPLOY_SERVER:/home/ibtahaj/spring-petclinic/
-          ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "java -jar /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar"
+          ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "nohup java -jar /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar > /dev/null 2>&1 &"
           rm -f ~/.ssh/id_rsa
                       
       - name: Wait for application to start
