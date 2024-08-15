@@ -106,18 +106,6 @@ jobs:
           export JAVA_HOME=/usr/lib/jvm/java-19-openjdk-amd64
           export PATH=$JAVA_HOME/bin:$PATH
           ./mvnw -B package
-  
-  test:
-      runs-on: self-hosted
-      needs: build
-      steps:
-        - name: Check application URL
-          run: |
-            echo "Checking application URL"
-            curl -s http://103.151.111.190:8080 || exit 1
-  
-        - name: Run tests
-          run: ./mvnw test
     
   deploy:
       runs-on: self-hosted
@@ -175,3 +163,14 @@ jobs:
                 sleep 10
               fi
             done
+  test:
+      runs-on: self-hosted
+      needs: build
+      steps:
+        - name: Check application URL
+          run: |
+            echo "Checking application URL"
+            curl -s http://103.151.111.190:8080 || exit 1
+  
+        - name: Run tests
+          run: ./mvnw test
