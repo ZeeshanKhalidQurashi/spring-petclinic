@@ -76,7 +76,7 @@ jobs:
       - name: Setup SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          DEPLOY_SERVER: '103.151.111.190'
+          DEPLOY_SERVER: '192.168.1.18'
         run: |
           echo "Setting up SSH..."
           mkdir -p ~/.ssh
@@ -91,7 +91,7 @@ jobs:
     
       - name: Deploy application
         env:
-          DEPLOY_SERVER: '103.151.111.190'
+          DEPLOY_SERVER: '192.168.1.18'
           DEPLOY_USER: 'ibtahaj'
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
@@ -104,7 +104,7 @@ jobs:
         run: |
           echo "Waiting for application to start..."
           for i in {1..30}; do
-            if curl -s http://103.151.111.190:8080 > /dev/null; then
+            if curl -s http://192.168.1.18:8081 > /dev/null; then
               echo "Application is up!"
               break
             else
@@ -120,7 +120,7 @@ jobs:
       - name: Check application URL
         run: |
           echo "Checking application URL"
-          curl -s http://103.151.111.190:8080 || exit 1
+          curl -s http://192.168.1.18:8081 || exit 1
   
       - name: Run tests
         run: ./mvnw test
