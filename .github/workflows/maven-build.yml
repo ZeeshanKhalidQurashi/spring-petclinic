@@ -64,8 +64,8 @@ jobs:
       - name: Verify JAR file
         run: |
           echo "Verifying JAR file presence..."
-          ls -al /home/ibtahaj/spring-petclinic/target/
-          if [ -z "$(find /home/ibtahaj/spring-petclinic/target/ -name 'spring-petclinic-3.3.0-SNAPSHOT.jar')" ]; then
+          ls -al /home/zeeshan/spring-petclinic/target/
+          if [ -z "$(find /home/zeeshan/spring-petclinic/target/ -name 'spring-petclinic-3.3.0-SNAPSHOT.jar')" ]; then
             echo "JAR file not found in target directory!"
             exit 1
           fi
@@ -76,7 +76,7 @@ jobs:
       - name: Setup SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          DEPLOY_SERVER: '103.151.111.190'
+          DEPLOY_SERVER: '103.151.111.144'
         run: |
           echo "Setting up SSH..."
           mkdir -p ~/.ssh
@@ -91,20 +91,20 @@ jobs:
     
       - name: Deploy application
         env:
-          DEPLOY_SERVER: '103.151.111.190'
-          DEPLOY_USER: 'ibtahaj'
+          DEPLOY_SERVER: '103.151.111.144'
+          DEPLOY_USER: 'zeeshan'
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           echo "Deploying application to $DEPLOY_SERVER"
-          scp -i ~/.ssh/id_rsa /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar $DEPLOY_USER@$DEPLOY_SERVER:/home/ibtahaj/spring-petclinic/
-          ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "nohup java -jar /home/ibtahaj/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar > /dev/null 2>&1 &"
+          scp -i ~/.ssh/id_rsa /home/zeeshan/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar $DEPLOY_USER@$DEPLOY_SERVER:/home/zeeshan/spring-petclinic/
+          ssh -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_SERVER "nohup java -jar /home/zeeshan/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar > /dev/null 2>&1 &"
           rm -f ~/.ssh/id_rsa
                       
       - name: Wait for application to start
         run: |
           echo "Waiting for application to start..."
           for i in {1..30}; do
-            if curl -s http://103.151.111.190:8080 > /dev/null; then
+            if curl -s http://103.151.111.144:8080 > /dev/null; then
               echo "Application is up!"
               break
             else
@@ -120,7 +120,7 @@ jobs:
       - name: Check application URL
         run: |
           echo "Checking application URL"
-          curl -s http://103.151.111.190:8080 || exit 1
+          curl -s http://103.151.111.144:8080 || exit 1
   
       - name: Run tests
         run: ./mvnw test
